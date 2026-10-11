@@ -20,7 +20,7 @@ self.addEventListener('fetch', event => {
  }
  event.respondWith((async()=>{
   const cache=await caches.open(CACHE);
-  const cached=await cache.match(event.request); if(cached)return cached;
+  const cached=await cache.match(event.request, {ignoreVary:true}); if(cached)return cached;
   return fetch(event.request);
  })());
 });
