@@ -1,0 +1,12 @@
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+const assets=(await readdir('dist/assets')).sort().map(name=>`assets/${name}`);
+const precache=['./','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','mascot.png',...assets];
+const hash=createHash('sha256');
+for(const path of ['sw.js',...precache])hash.update(await readFile(path==='./'?'dist/index.html':`dist/${path}`));
+const version=hash.digest('hex').slice(0,16);
+let sw=await readFile('dist/sw.js','utf8');
+sw=sw.replace('__VERSION__',version).replace('__PRECACHE__',JSON.stringify(precache));
+await writeFile('dist/sw.js',sw);
+await writeFile('dist/.nojekyll','');
+console.log(`PWA shell ${version}: ${precache.length} files precached`);
